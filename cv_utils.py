@@ -59,75 +59,56 @@ def bin_spatial(img, color_space='RGB', size=(32, 32)):
     return features
 
 
-# Define a function to extract features from a list of images
-# Have this function call bin_spatial() and color_hist()
-def extract_features(imgs, cspace='RGB', orient=9,
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0, spatial_size=(32, 32),
-                        hist_bins=32, hist_range=(0, 256)):
-    # Create a list to append feature vectors to
-    features = []
-    # Iterate through the list of images
-    for file in imgs:
-        # Read in each one by one
-        image = mpimg.imread(file)
-        # apply color conversion if other than 'RGB'
-        feature_image = convert_color_space(image, color_space = cspace)
-        # Call get_hog_features() with vis=False, feature_vec=True
-
+def single_img_features(image, color_space='RGB', spatial_size=(32, 32),
+                        hist_bins=32, orient=9,
+                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                        spatial_feat=True, hist_feat=True, hog_feat=True, hist_range=(0,255)):
+    #1) Define an empty list to receive features
+    img_features = []
+    #2) Apply color conversion if other than 'RGB'
+    feature_image = convert_color_space(image, color_space=color_space)
+    #3) Compute spatial features if flag is set
+    if spatial_feat == True:
+        spatial_features = bin_spatial(feature_image, size=spatial_size)
+        #4) Append features to list
+        img_features.append(spatial_features)
+    #5) Compute histogram features if flag is set
+    if hist_feat == True:
+        hist_features = color_hist(feature_image, nbins=hist_bins, bins_range=hist_range)
+        #6) Append features to list
+        img_features.append(hist_features)
+    #7) Compute HOG features if flag is set
+    if hog_feat == True:
         if hog_channel == 'ALL':
             hog_features = []
             for channel in range(feature_image.shape[2]):
-                hog_features.append(get_hog_features(feature_image[:,:,channel],
+                hog_features.extend(get_hog_features(feature_image[:,:,channel],
                                     orient, pix_per_cell, cell_per_block,
                                     vis=False, feature_vec=True))
-            hog_features = np.ravel(hog_features)
         else:
             hog_features = get_hog_features(feature_image[:,:,hog_channel], orient,
                         pix_per_cell, cell_per_block, vis=False, feature_vec=True)
+        #8) Append features to list
+        img_features.append(hog_features)
+
+    #9) Return concatenated array of features
+    return np.concatenate(img_features)
 
 
-        features.append(hog_features)
-    # Return list of feature vectors
-    return features
+def get_image_features(images, color_space='RGB', spatial_size=(32, 32),
+                        hist_bins=32, orient=9,
+                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                        spatial_feat=True, hist_feat=True, hog_feat=True, hist_range=(0,255)):
+
+    all_features = []
+    for image in images:
+        image =  mpimg.imread(image)
+        features = single_img_features(image, color_space=color_space, spatial_size=spatial_size,
+                            hist_bins=hist_bins, orient=orient,
+                            pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, hog_channel=hog_channel,
+                            spatial_feat=spatial_feat, hist_feat=hist_feat, hog_feat=hog_feat, hist_range=hist_range)
+        all_features.append(features)
 
 
-
-
-def combine_color_features(imgs, cspace='RGB', orient=9,
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0, spatial_size=(32, 32),
-                        hist_bins=32, hist_range=(0, 256)):
-    # Create a list to append feature vectors to
-    features = []
-    # Iterate through the list of images
-    for file in imgs:
-        # Read in each one by one
-        image = mpimg.imread(file)
-
-
-        feature_image = convert_color_space(image, color_space=cspace)
-        # Call get_hog_features() with vis=False, feature_vec=True
-
-        spatial_features = bin_spatial(feature_image, size=spatial_size)
-        hist_features = color_hist(feature_image, nbins=hist_bins, bins_range=hist_range)
-
-
-        if hog_channel == 'ALL':
-            hog_features = []
-            for channel in range(feature_image.shape[2]):
-                hog_features.append(get_hog_features(feature_image[:, :, channel],
-                                                     orient, pix_per_cell, cell_per_block,
-                                                     vis=False, feature_vec=True))
-            hog_features = np.ravel(hog_features)
-        else:
-            hog_features = get_hog_features(feature_image[:, :, hog_channel], orient,
-                                            pix_per_cell, cell_per_block, vis=False, feature_vec=True)
-
-
-        # Apply color_hist() also with a color space option now
-
-        features.append(np.concatenate((spatial_features, hist_features, hog_features)))
-    # Return list of feature vectors
-    return features
-
-
+    return all_features
 
