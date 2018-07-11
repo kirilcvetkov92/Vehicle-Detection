@@ -116,7 +116,7 @@ def get_image_features(images, color_space='RGB', spatial_size=(32, 32),
 def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
     img = img.astype(np.float32) / 255
 
-    img_tosearch = img[ystart:ystop, :, :]
+    img_tosearch = img[ystart:ystop, 450:, :]
     ctrans_tosearch = convert_color_space(img_tosearch, color_space='YUV')
     if scale != 1:
         imshape = ctrans_tosearch.shape
@@ -175,7 +175,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                 ytop_draw = np.int(ytop * scale)
                 win_draw = np.int(window * scale)
                 rectangles.append(
-                    ((xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart)))
+                    ((xbox_left+450, ytop_draw + ystart), (xbox_left + win_draw+450, ytop_draw + win_draw + ystart)))
 
     return rectangles
 
@@ -198,17 +198,156 @@ def apply_threshold(heatmap, threshold):
     return heatmap
 
 
-def draw_labeled_bboxes(img, labels):
+
+class Rectangle:
+    updating = False
+    tick_count = 0
+    remove_count = 30
+    start_count = 5
+
+    def __init__(self, x1, y1, x2, y2, _id):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.id = _id
+        self.updating = False
+        self.start_count = 5
+
+    def update(self, x1, y1, x2, y2, frames=0):
+
+        remove_count = 20
+        self.tick_count = frames
+
+        #         if(abs(x1-x2)<abs(y1-y2)):
+        #             print('OBRATEN PRAVOAGOLNIK---Debug')
+        #             self.updating=False
+        #             self.stepX1 = 0
+        #             self.stepX2 = 0
+        #             self.stepY1 = 0
+        #             self.stepY2 = 0
+        #             return False
+
+        if self.start_count != 0:
+            self.start_count -= 1
+        else:
+            self.updating = True
+
+        distX1 = x1 - self.x1
+        distX2 = x2 - self.x2
+        distY1 = y1 - self.y1
+        distY2 = y2 - self.y2
+
+        if (abs(distX1) + abs(distX2) + abs(distY1) + abs(distY2) > 300):
+            print('SOSEMA PREMESTEN PRAVOAGOLNIK---Debug')
+            frames = 1
+            self.tick_count = 1
+            self.start_count = 5
+
+        self.stepX1 = distX1 / frames
+        self.stepX2 = distX2 / frames
+        self.stepY1 = distY1 / frames
+        self.stepY2 = distY2 / frames
+
+        return True
+
+    def update_delta(self):
+
+        if self.updating:
+            self.x1 += self.stepX1
+            self.x2 += self.stepX2
+            self.y1 += self.stepY1
+            self.y2 += self.stepY2
+
+            self.tick_count -= 1
+
+        if self.tick_count == 0:
+            self.updating = False
+
+    def get_distance(self, x1, y1, x2, y2):
+        return abs(self.x1 - x1) + abs(self.y1 - y1) + abs(self.x2 - x2) + abs(self.y2 - y2)
+
+
+def draw_labeled_bboxes(img, labels, car_dict):
+
     # Iterate through all detected cars
-    for car_number in range(1, labels[1] + 1):
+    car_set = set()
+    for iterator_number in range(1, labels[1] + 1):
+        car_number = iterator_number
         # Find pixels with each car_number label value
         nonzero = (labels[0] == car_number).nonzero()
         # Identify x and y values of those pixels
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
         # Define a bounding box based on min/max x and y
-        bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
+        # print(car_dict)
+
+        x1 = np.min(nonzerox)
+        y1 = np.min(nonzeroy)
+        x2 = np.max(nonzerox)
+        y2 = np.max(nonzeroy)
+
+        min_distance = 99999
+        min_key = None
+
+        for key in car_dict:
+            # print(key)
+            cur_dist = car_dict[key].get_distance(x1, y1, x2, y2)
+            # print(cur_dist)
+            if cur_dist < min_distance:
+                min_distance = cur_dist
+                min_key = key
+        if min_key is not None:
+            if min_distance < 300:
+                car_number = min_key
+            else:
+                for i in range(1, 10):
+                    if i not in car_dict:
+                        car_number = i
+                        break
+
+        # print('car_number', car_number, 'min_dist', min_distance, 'minkey', min_key)
+        car_set.add(car_number)
+
+        if car_number in car_dict:
+            rect = car_dict[car_number]
+            if rect.updating:
+                # print('Already Updating', car_number)
+                rect.update_delta()
+                bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
+
+            else:
+                # print('Not updating-> but start', car_number)
+                bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
+                rect.update(x1, y1, x2, y2, frames=20)
+        else:
+            bbox = ((x1, y1), (x2, y2))
+            if (abs(x1 - x2) >= abs(y1 - y2)):
+                car_dict[car_number] = Rectangle(x1, y1, x2, y2, car_number)
+
         # Draw the box on the image
-        cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
+        if car_dict[car_number].start_count == 0:
+            cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
+        else:
+            # print('not drawn', car_number, 'count:', car_dict[car_number].start_count)
+            pass
+        rect = car_dict[car_number]
+        # print('car_nymber', car_number, 'tick_count', rect.tick_count,'updating', rect.updating,'remove count', rect.remove_count,
+        # 'start_count', rect.start_count)
     # Return the image
-    return img
+    car_keys = car_dict.keys()
+    exclusion = car_keys - car_set
+    for key in exclusion:
+        # print('--------------',key)
+        rect = car_dict[key]
+        rect.remove_count -= 1
+        if not rect.updating:
+            rect.start_count = 5
+        if (rect.remove_count == 0):
+            del car_dict[key]
+            continue
+        if rect.updating:
+            bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
+            cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
+
+    return img, car_dict
