@@ -2,7 +2,6 @@ from skimage.feature import hog
 import cv2
 import numpy as np
 import matplotlib.image as mpimg
-import sys
 
 # Define a function to compute color histogram features
 def color_hist(img, nbins=32, bins_range=(0, 256)):
@@ -200,8 +199,8 @@ def apply_threshold(heatmap, threshold):
 
 
 class Rectangle:
-	"""
-	Create robust rectangle update based on creating animation approximating to another bbox that least for few frames   
+    """
+    Create robust rectangle update based on creating animation approximating to another bbox that least for few frames   
     
     Class members:
     updating -- Whether the animation for approximating to a bbox still performing or not   
@@ -209,7 +208,6 @@ class Rectangle:
     remove_count -- Frames till the rectangle will still be alive
     start_count -- Frames till the rectangle will start be visible live
     """
-
 
     updating = False
     tick_count = 0
@@ -283,7 +281,7 @@ def draw_labeled_bboxes(img, labels, car_dict):
         x2 = np.max(nonzerox)
         y2 = np.max(nonzeroy)
 
-        min_distance = sys.maxint
+        min_distance = 2**31 - 1
         min_key = None
 
         #get min rectangle distance
