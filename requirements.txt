@@ -1,0 +1,18 @@
+name: vehicle detection
+channels:
+    - https://conda.anaconda.org/menpo
+    - conda-forge
+
+dependencies:
+- python==3.5.2
+- keras==2.1.5
+- numpy
+- matplotlib
+- opencv3
+- pillow
+- h5py
+- ffmpeg
+
+   - pip:
+        - moviepy
+        - tensorflow-gpu==1.7.0
