@@ -2,7 +2,7 @@ from skimage.feature import hog
 import cv2
 import numpy as np
 import matplotlib.image as mpimg
-
+import sys
 
 # Define a function to compute color histogram features
 def color_hist(img, nbins=32, bins_range=(0, 256)):
@@ -200,6 +200,17 @@ def apply_threshold(heatmap, threshold):
 
 
 class Rectangle:
+	"""
+	Create robust rectangle update based on creating animation approximating to another bbox that least for few frames   
+    
+    Class members:
+    updating -- Whether the animation for approximating to a bbox still performing or not   
+    tick_count -- Frames till the animation will still perform
+    remove_count -- Frames till the rectangle will still be alive
+    start_count -- Frames till the rectangle will start be visible live
+    """
+
+
     updating = False
     tick_count = 0
     remove_count = 30
@@ -215,18 +226,8 @@ class Rectangle:
         self.start_count = 5
 
     def update(self, x1, y1, x2, y2, frames=0):
-
         remove_count = 20
         self.tick_count = frames
-
-        #         if(abs(x1-x2)<abs(y1-y2)):
-        #             print('OBRATEN PRAVOAGOLNIK---Debug')
-        #             self.updating=False
-        #             self.stepX1 = 0
-        #             self.stepX2 = 0
-        #             self.stepY1 = 0
-        #             self.stepY2 = 0
-        #             return False
 
         if self.start_count != 0:
             self.start_count -= 1
@@ -237,12 +238,6 @@ class Rectangle:
         distX2 = x2 - self.x2
         distY1 = y1 - self.y1
         distY2 = y2 - self.y2
-
-        if (abs(distX1) + abs(distX2) + abs(distY1) + abs(distY2) > 300):
-            print('SOSEMA PREMESTEN PRAVOAGOLNIK---Debug')
-            frames = 1
-            self.tick_count = 1
-            self.start_count = 5
 
         self.stepX1 = distX1 / frames
         self.stepX2 = distX2 / frames
@@ -261,6 +256,7 @@ class Rectangle:
 
             self.tick_count -= 1
 
+        #the animation is finished
         if self.tick_count == 0:
             self.updating = False
 
@@ -287,20 +283,24 @@ def draw_labeled_bboxes(img, labels, car_dict):
         x2 = np.max(nonzerox)
         y2 = np.max(nonzeroy)
 
-        min_distance = 99999
+        min_distance = sys.maxint
         min_key = None
 
+        #get min rectangle distance
         for key in car_dict:
-            # print(key)
             cur_dist = car_dict[key].get_distance(x1, y1, x2, y2)
-            # print(cur_dist)
+
             if cur_dist < min_distance:
                 min_distance = cur_dist
                 min_key = key
+
+        # if we found similar rectangle from previous frame
         if min_key is not None:
+        	# if minimum distance is less than 300, then we found rectangle from previous frame
             if min_distance < 300:
                 car_number = min_key
             else:
+            	#fill where we have empty place (todo code improvement : we can remove the for iteration)
                 for i in range(1, 10):
                     if i not in car_dict:
                         car_number = i
@@ -312,15 +312,16 @@ def draw_labeled_bboxes(img, labels, car_dict):
         if car_number in car_dict:
             rect = car_dict[car_number]
             if rect.updating:
-                # print('Already Updating', car_number)
+                # the bbox is updating, and we will proceed to the next update frame part
                 rect.update_delta()
                 bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
 
             else:
-                # print('Not updating-> but start', car_number)
+                # the bbox is not updating, and we should start approximating 
                 bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
                 rect.update(x1, y1, x2, y2, frames=20)
         else:
+        	# We create initial bounding box
             bbox = ((x1, y1), (x2, y2))
             if (abs(x1 - x2) >= abs(y1 - y2)):
                 car_dict[car_number] = Rectangle(x1, y1, x2, y2, car_number)
@@ -336,17 +337,21 @@ def draw_labeled_bboxes(img, labels, car_dict):
         # 'start_count', rect.start_count)
     # Return the image
     car_keys = car_dict.keys()
+
+    #find not used rectangles in this frame
     exclusion = car_keys - car_set
     for key in exclusion:
-        # print('--------------',key)
         rect = car_dict[key]
+        #increase the remove count
         rect.remove_count -= 1
         if not rect.updating:
+        	#reset the start count
             rect.start_count = 5
         if (rect.remove_count == 0):
             del car_dict[key]
             continue
         if rect.updating:
+        	#if the rectangle is in updating state draw the cv rectangle
             bbox = ((int(rect.x1), int(rect.y1)), (int(rect.x2), int(rect.y2)))
             cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
 
