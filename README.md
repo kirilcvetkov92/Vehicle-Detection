@@ -56,8 +56,7 @@ Bellow are the parameter combination I used for extracting the hog features for 
 * Pixels per cell = (16,16)
 * Cells per block = (2,2)
 
-#### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
-
+#### 3. Describtion how  I trained a classifier using my selected HOG features
 I trained a linear SVM using only the `hog features`. First and foremost my goal was to achieve 10+ fps, with fair performance on my Intel i5 8600K.
 
 The full code is inside the main Notebook.py file, under `Generate dataset and train the model heading`.
