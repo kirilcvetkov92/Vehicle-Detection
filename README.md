@@ -67,7 +67,7 @@ The classifier is implemented so it has more flexibility in the choice of penalt
 
 
 Code: 
-``
+```
     # Fit a per-column scaler
     X_scaler = StandardScaler().fit(X_train)
     # Apply the scaler to X
@@ -83,7 +83,7 @@ Code:
     t=time.time()
     svc.fit(X_train, y_train)
     t2 = time.time()
-``    
+```    
     
     
 
