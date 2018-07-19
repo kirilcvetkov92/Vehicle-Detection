@@ -214,11 +214,7 @@ I readed lot about RCNN and YOLO algorithm, and bellow is implementation and exp
 
 
 
-### Yolo V2.
-
-#### Instalation :
-
-
+### Yolo V2. [Notebook YoloV2](./Documents/Vehicle-Detection/YoloV2/Notebook.ipynb)
 
 
 #### Introduction
@@ -314,3 +310,69 @@ In Yolo V2, this specialization is ‘assisted’ with predefined anchors as in 
 
     * new centroïds are computed by taking the box inside each cluster that minimizes the mean IOU with all other boxes inside the cluster
 
+
+#### Instalation :
+* Install the packets in requirements.txt file
+* Download the weights
+* Convert the weights with the provided script
+* Load the weights in keras
+
+##### Download the weights
+
+For the purpose of this project, I'm using a pretrained weights for Yolo V2.
+You can download the weights <a href = "http://pjreddie.com/media/files/yolo.weights"> here</a>
+
+These weights are generated with using pure numpy arrays, but luckily the authors of Yolo provided configuration files containing the full model information, which means we can convert the weights in any high level program language.
+Allan Zelener wrote a function for weights conversion, which works well for Yolo V2, and I provided small modifications for Yolo V3 References are at the end of this notebook.
+
+**Once the download finish, please put the weights file to YoloV2 folder**
+
+##### Convert the weights with the provided script
+```
+./script.py yolo.cfg yolo.weights model_data/yolo.h5
+```
+
+##### Loading a pretrained model
+See notebook : 
+[Notebook YoloV2](./Documents/Vehicle-Detection/YoloV2/Notebook.ipynb)
+
+
+
+### Yolo V3. [Notebook YoloV3](./Documents/Vehicle-Detection/YoloV3/Notebook.ipynb)
+
+### Architercutre details modification
+
+Neural network io:
+-  **input** : (m, 416, 416, 3)
+-  **output** : confidece of an object being present in the rectangle, list of rectangles position and sizes and classes of the objects begin detected. Each bounding box is represented by 6 numbers $(Pc, Rx, Ry, Rh, Rw, C1..Cn)$ as explained above. In this case n=80, which means we have $c$ as 80-dimensional vector, and the final size of representing the bounding box is 85 
+
+The first detection is made by the 82nd layer. For the first 81 layers, the image is down sampled by the network, such that the 81st layer has a stride of 32. If we have an image of 416 x 416, the resultant feature map would be of size 13 x 13. One detection is made here using the 1 x 1 detection kernel, giving us a detection feature map of 13 x 13 x 3 x 85.
+
+Then, the feature map from layer 79 is subjected to a few convolutional layers before being up sampled by 2x to dimensions of 26 x 26. This feature map is then depth concatenated with the feature map from layer 61. Then the combined feature maps is again subjected a few 1 x 1 convolutional layers to fuse the features from the earlier layer (61). Then, the second detection is made by the 94th layer, yielding a detection feature map of 26 x 26 x 3 x 85.
+
+A similar procedure is followed again, where the feature map from layer 91 is subjected to few convolutional layers before being depth concatenated with a feature map from layer 36. Like before, a few 1 x 1 convolutional layers follow to fuse the information from the previous layer (36). We make the final of the 3 at 106th layer, yielding feature map of size 52 x 52 x 3 x 85.
+
+YOLO v3, in total uses 9 anchor boxes. Three for each scale. 
+
+<img src="notebook_images/architecture.png" style="width:95%;height:95%;">
+
+<caption> Note : The last three terms of the loss function in YOLO v2 are the squared errors, whereas in YOLO v3, they’ve been replaced by cross-entropy error terms. In other words, object confidence and class predictions in YOLO v3 are now predicted through logistic regression.  
+YOLO v3, in total uses 9 anchor boxes. Three for each scale</caption>  
+
+---------------------------------------
+
+
+# Anchor Boxes modification
+
+Generating anchor boxes using K-means clustering
+
+YOLO v3, in total uses 9 anchor boxes. Three for each scale. If you’re training YOLO on your own dataset, you should go about using K-Means clustering to generate 9 anchors.
+
+Then, arrange the anchors is descending order of a dimension. Assign the three biggest anchors for the first scale , the next three for the second scale, and the last three for the third.
+
+
+We make predictions on the offsets to the anchors. Nevertheless, if it is unconstrained, our guesses will be randomized again. YOLO predicts 5 parameters (tx, ty, tw, th, and to) and applies the sigma function to constraint its possible offset range.
+
+<img src="notebook_images/formula.png" style="width:50%;height:50%;">
+
+To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 clusters. For COCO, the width and height of the anchors are (10×13),(16×30),(33×23),(30×61),(62×45),(59× 119),(116 × 90),(156 × 198),(373 × 326). These 9 priors are grouped into 3 different groups according to their scale. Each group is assigned to a specific feature map above in detecting objects.
