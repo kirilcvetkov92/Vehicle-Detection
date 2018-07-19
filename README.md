@@ -25,7 +25,8 @@ The goals / steps of this project are the following:
 [image8]: ./YoloV3/notebook_images/architecture.png
 [image9]: ./YoloV3/notebook_images/formula.png
 [image10]: ./documentation/hog.png
-
+[image11]: ./documentation/sliding_window.png
+[image12]: ./documentation/examples.png
 
 ### Histogram of Oriented Gradients (HOG)
 
@@ -92,6 +93,7 @@ Code:
 
 The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
 
+* Input [YMin, YMax, Scale]
 * Initialize rectangles to empty list
 * Precompute the Hog Features for the entire image
 * Foreach portion window in `YMin` `YMax` region: 
@@ -102,35 +104,39 @@ The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
           * Append the window region to rectangles list with factor `scale`
     
 
-I use composition of the following Rectangle scales, which were choosen carefully according to:
+I use composition on three search scales, using YUV which were choosen carefully according to:
 * Fair accuracy on Test images 
 * Fair processing/search speed
 
 
-YMin = 400  
-YMax = 500  
-scale = 1.5  
-  
-YMin = 400  
-YMax = 550  
-scale = 2.0  
-
-YMin = 400  
-YMax = 600  
-scale = 3.5
-
-
 Below is the result of the input/output sliding window search : 
-
-
-
-![alt text][image3]
+![alt text][image11]
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![alt text][image4]
+I use composition on three search scales, using YUV which were choosen carefully according to:
+* Fair accuracy on Test images 
+* Fair processing/search speed
+
+* Box Search 1
+     * YMin = 400  
+     * YMax = 500  
+     * scale = 1.5  
+
+* Box Search 2
+     * YMin = 400  
+     * YMax = 550  
+     * scale = 2.0  
+
+* Box Search 3
+     * YMin = 400  
+     * YMax = 600  
+     * scale = 3.5
+     
+Here are some example images:
+
+![alt text][image12]
 ---
 
 ### Video Implementation
