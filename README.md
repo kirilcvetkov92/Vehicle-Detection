@@ -95,7 +95,7 @@ Code:
 
 ### Sliding Window Search
 
-#### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+#### 1. Describtion about how I implemented a sliding window search and how did I decide what scales to search and how much to overlap windows.
 
 The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
 
@@ -118,7 +118,8 @@ I use composition on three search scales, using YUV color channel, and these par
 Below is the result of the input/output sliding window search : 
 ![alt text][image11]
 
-#### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
+#### Examples of test images and optimizing performance
+ Below  are some examples of test images to demonstrate how my pipeline is working. What I did to optimize the performance of my classifier?
 
 I use composition on three search scales, using YUV which were choosen carefully according to:
 * Fair accuracy on Test images 
