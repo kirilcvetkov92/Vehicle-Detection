@@ -148,7 +148,7 @@ Using YUV as color channel I got validation accuracy : 98.4
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](https://www.youtube.com/watch?v=26H7qdBbTls)
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
@@ -174,7 +174,7 @@ for all rectangles in current_frame_rectangles:
      else 
           append closest_rectangle to alive_rectangles list
 
-#remove all outdated rectangles
+//remove all outdated rectangles
 for all rectangles in (previous_frame_rectangle-current_frame_rectangles):
      if rectangle.remove_count==0
           remove rectangle
@@ -182,9 +182,10 @@ for all rectangles in (previous_frame_rectangle-current_frame_rectangles):
           append rectangle to alive_rectangles list
      rectangle.remove_count--
      
-#updated all alive rectangles
+//updated all alive rectangles
 for all rectangles in alive_rectangles :
-     if rectangle is updating it's position with smooth effect :
+     //if rectangl is updating current position
+     if rectangle.step_count>0 :
           update position to the next delta step
           rectangle.step_count--
      else 
@@ -197,18 +198,6 @@ for all rectangles in alive_rectangles :
           draw rectangle
      
 previous_frame_rectangles = alive_rectangles
-```
-### Here are six frames and their corresponding heatmaps:
-
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
-
 
 ---
 
