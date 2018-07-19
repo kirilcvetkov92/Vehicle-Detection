@@ -90,7 +90,39 @@ Code:
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
+
+* Initialize rectangles to empty list
+* Precompute the Hog Features for the entire image
+* Foreach portion window in `YMin` `YMax` region: 
+     * Select the portion of the hog features
+     * Subsample the features according to the size of the window
+     * Classify Features
+     * If Classifier is 1
+          * Append the window region to rectangles list with factor `scale`
+    
+
+I use composition of the following Rectangle scales, which were choosen carefully according to:
+* Fair accuracy on Test images 
+* Fair processing/search speed
+
+
+YMin = 400  
+YMax = 500  
+scale = 1.5  
+  
+YMin = 400  
+YMax = 550  
+scale = 2.0  
+
+YMin = 400  
+YMax = 600  
+scale = 3.5
+
+
+Below is the result of the input/output sliding window search : 
+
+
 
 ![alt text][image3]
 
