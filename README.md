@@ -214,7 +214,7 @@ I readed lot about RCNN and YOLO algorithm, and bellow is implementation and exp
 
 
 
-### Yolo V2. [Notebook YoloV2](./Documents/Vehicle-Detection/YoloV2/Notebook.ipynb)
+### Yolo V2. [Notebook YoloV2](./YoloV2/Notebook.ipynb)
 
 
 #### Introduction
@@ -302,14 +302,16 @@ In Yolo V2, this specialization is ‘assisted’ with predefined anchors as in 
 
 * all ground-truth bounding boxes are centered on (0,0)
 
-* the algorithm initiates 5 centroïds by drawing randomly 5 of the ground-truth bounding boxes
+* the algorithm initiates 5 centroids by drawing randomly 5 of the ground-truth bounding boxes
 
 * then, the following two steps are alternated:
 
-    * each ground truth box is assigned to one of the centroïd, using as distance measure the IOU, in order to get 5 clusters or groups of ground-truth bouding boxes
+    * each ground truth box is assigned to one of the centroid, using as distance measure the IOU, in order to get 5 clusters or groups of ground-truth bouding boxes
 
-    * new centroïds are computed by taking the box inside each cluster that minimizes the mean IOU with all other boxes inside the cluster
+    * new centroids are computed by taking the box inside each cluster that minimizes the mean IOU with all other boxes inside the cluster
 
+To determine the priors, YOLOv2 applies k-means cluster. Then it pre-select 5 clusters. For COCO, the width and height of the anchors are (0.57273,0.677385),(1.87446,2.06253 ),(3.33843,5.47434),(7.88282,3.52778),(62×45),(9.77052,9.16828 )
+and they are relative to the final feature map 
 
 #### Instalation :
 * Install the packets in requirements.txt file
@@ -334,11 +336,11 @@ Allan Zelener wrote a function for weights conversion, which works well for Yolo
 
 ##### Loading a pretrained model
 See notebook : 
-[Notebook YoloV2](./Documents/Vehicle-Detection/YoloV2/Notebook.ipynb)
+[Notebook YoloV2](./YoloV2/Notebook.ipynb)
 
 
 
-### Yolo V3. [Notebook YoloV3](./Documents/Vehicle-Detection/YoloV3/Notebook.ipynb)
+### Yolo V3. [Notebook YoloV3](./YoloV3/Notebook.ipynb)
 
 #### Architercutre details modification
 
@@ -376,7 +378,6 @@ We make predictions on the offsets to the anchors. Nevertheless, if it is uncons
 <img src="YoloV3/notebook_images/formula.png" style="width:50%;height:50%;">
 
 To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 clusters. For COCO, the width and height of the anchors are (10×13),(16×30),(33×23),(30×61),(62×45),(59× 119),(116 × 90),(156 × 198),(373 × 326). These 9 priors are grouped into 3 different groups according to their scale. Each group is assigned to a specific feature map above in detecting objects.
-
 
 **References**: 
 - Joseph Redmon, Santosh Divvala, Ross Girshick, Ali Farhadi - [You Only Look Once: Unified, Real-Time Object Detection](https://arxiv.org/abs/1506.02640) (2015)
