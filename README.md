@@ -4,8 +4,8 @@
 
 
 | Project Video|  Yolo V2 |  Yolo V3 | Custom Video |
-|:-----------:|:----------:|:---------:|:---------:|
-| [![Introduction video](https://img.youtube.com/vi/1SU1MLMNfAI/0.jpg)](https://www.youtube.com/watch?v=1SU1MLMNfAI)   	| [![Introduction video](https://img.youtube.com/vi/Pjja4e8vPp0/0.jpg)](https://www.youtube.com/watch?v=Pjja4e8vPp0| [![Introduction video](https://img.youtube.com/vi/BiFTq9DPSE0/0.jpg)](https://www.youtube.com/watch?v=BiFTq9DPSE0) | (https://img.youtube.com/vi/26H7qdBbTls/0.jpg)](https://www.youtube.com/watch?v=26H7qdBbTls)|
+|:---------:|:----------:|:---------:|:---------:|
+| [![Introduction video](https://img.youtube.com/vi/1SU1MLMNfAI/0.jpg)](https://www.youtube.com/watch?v=1SU1MLMNfAI) |[![Yolo v2 video](https://img.youtube.com/vi/Pjja4e8vPp0/0.jpg)](https://www.youtube.com/watch?v=Pjja4e8vPp0) |  [![Yolo v3 video](https://img.youtube.com/vi/BiFTq9DPSE0/0.jpg)](https://www.youtube.com/watch?v=BiFTq9DPSE0) | [![Custom video](https://img.youtube.com/vi/26H7qdBbTls/0.jpg)](https://www.youtube.com/watch?v=26H7qdBbTls)|
 
 
 ---
