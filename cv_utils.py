@@ -325,12 +325,12 @@ def draw_labeled_bboxes(img, labels, car_dict):
                 car_dict[car_number] = Rectangle(x1, y1, x2, y2, car_number)
 
         # Draw the box on the image
-        if car_dict[car_number].start_count == 0:
-            cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
+        if car_number in car_dict:
+        	if car_dict[car_number].start_count == 0:
+        		cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
         else:
             # print('not drawn', car_number, 'count:', car_dict[car_number].start_count)
             pass
-        rect = car_dict[car_number]
         # print('car_nymber', car_number, 'tick_count', rect.tick_count,'updating', rect.updating,'remove count', rect.remove_count,
         # 'start_count', rect.start_count)
     # Return the image
