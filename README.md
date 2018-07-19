@@ -344,7 +344,7 @@ See notebook :
 
 Neural network io:
 -  **input** : (m, 416, 416, 3)
--  **output** : confidece of an object being present in the rectangle, list of rectangles position and sizes and classes of the objects begin detected. Each bounding box is represented by 6 numbers $(Pc, Rx, Ry, Rh, Rw, C1..Cn)$ as explained above. In this case n=80, which means we have $c$ as 80-dimensional vector, and the final size of representing the bounding box is 85 
+-  **output** : confidece of an object being present in the rectangle, list of rectangles position and sizes and classes of the objects begin detected. Each bounding box is represented by 6 numbers `(Pc, Rx, Ry, Rh, Rw, C1..Cn)` as explained above. In this case n=80, which means we have `c` as 80-dimensional vector, and the final size of representing the bounding box is 85 
 
 The first detection is made by the 82nd layer. For the first 81 layers, the image is down sampled by the network, such that the 81st layer has a stride of 32. If we have an image of 416 x 416, the resultant feature map would be of size 13 x 13. One detection is made here using the 1 x 1 detection kernel, giving us a detection feature map of 13 x 13 x 3 x 85.
 
@@ -376,3 +376,23 @@ We make predictions on the offsets to the anchors. Nevertheless, if it is uncons
 <img src="YoloV3/notebook_images/formula.png" style="width:50%;height:50%;">
 
 To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 clusters. For COCO, the width and height of the anchors are (10×13),(16×30),(33×23),(30×61),(62×45),(59× 119),(116 × 90),(156 × 198),(373 × 326). These 9 priors are grouped into 3 different groups according to their scale. Each group is assigned to a specific feature map above in detecting objects.
+
+
+
+
+
+
+
+
+**References**: 
+- Joseph Redmon, Santosh Divvala, Ross Girshick, Ali Farhadi - [You Only Look Once: Unified, Real-Time Object Detection](https://arxiv.org/abs/1506.02640) (2015)
+- Joseph Redmon, Ali Farhadi - [YOLO9000: Better, Faster, Stronger](https://arxiv.org/abs/1612.08242) (2016)
+- Allan Zelener - [YAD2K: Yet Another Darknet 2 Keras](https://github.com/allanzelener/YAD2K)
+- The official YOLO website (https://pjreddie.com/darknet/yolo/) 
+- Vivek Yadav [<a href="https://medium.com/@vivek.yadav/part-1-generating-anchor-boxes-for-yolo-like-network-for-vehicle-detection-using-kitti-dataset-b2fe033e5807">Generating Anchor boxes for Yolo-like network for vehicle detection using KITTI dataset]</a>
+- Christopher Bourez's blog [<a href="http://christopher5106.github.io/object/detectors/2017/08/10/bounding-box-object-detectors-understanding-yolo.html">Bounding box object detectors: understanding YOLO, You Look Only Once</a>]
+- Andrew NG Coursera : [<a href="https://www.coursera.org/learn/convolutional-neural-networks">Convolutional Neural Networks
+</a>]
+- Jonathan Hui : [<a href="https://medium.com/@jonathan_hui/real-time-object-detection-with-yolo-yolov2-28b1b93e2088">Real-time Object Detection with YOLO, YOLOv2 and now YOLOv3
+</a>]
+
