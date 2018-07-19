@@ -1,5 +1,5 @@
 ## Writeup Template
-### Writup for this project
+### Author : Kiril Cvetkov
 
 ---
 
