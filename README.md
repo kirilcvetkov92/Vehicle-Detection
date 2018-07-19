@@ -198,12 +198,119 @@ for all rectangles in alive_rectangles :
           draw rectangle
      
 previous_frame_rectangles = alive_rectangles
-
+```
 ---
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discussion about problems / issues I faced in my initial implementation of this implementation.  Where will my pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+First and foremost, The biggest problem of this pipeline is that it's hard for us to create composition of features or applying filters that will work fine on all road conditions, lights, shadows, noise. 
+Second, The sliding window algorithm is not optimal, and it cost us lot of processing time.
+So with 7FPS I can say that I have poor performance and poor quality of my algorithm.
+
+My journey has just started here,
+I readed lot about RCNN and YOLO algorithm, and bellow is implementation and explanation of YOLO V2 and V3 for this project.
+
+
+
+### Yolo V2.
+
+#### Instalation :
+
+
+
+
+#### Introduction
+Integration of (https://arxiv.org/abs/1506.02640) and Redmon and Farhadi, 2016 (https://arxiv.org/abs/1612.08242). 
+
+YOLO stands for You Only Look Once. It's an object detector that uses features learned by a deep convolutional neural network to detect an object. Before we get out hands dirty with code, we must understand how YOLO works.
+
+
+
+#### Architercutre details
+
+Bounding box exmple :
+
+<img src="YoloV2/notebook_images/rectangle.png" style="width:70%;height:70%;">
+
+
+In this prject, I use pretrained weights, where we have 80 trained yolo classes, for recognition.  
+The class label is represented as `c` and it's integer from 1 to 80, each number represent the class label accordingly.  
+If `c=3`, then the classified object is a `car`
+
+
+Neural network io:
+-  **input** : (m, 608, 608, 3)
+-  **output** : confidece of an object being present in the rectangle, list of rectangles position and sizes and classes of the objects begin detected. Each bounding box is represented by 6 numbers `(Pc, Rx, Ry, Rh, Rw, C1..Cn)` as explained above. In this case n=80, which means we have `c` as 80-dimensional vector, and the final size of representing the bounding box is 85 
+
+
+Let us consider an input, where the input image is 608 x 608, and stride of the network is 32. As pointed earlier, the dimensions of the feature map will be 13 x 13. We then divide the input image into 19 x 19 cells.
+
+<img src="YoloV2/notebook_images/architecture.png" style="width:95%;height:95%;">
+
+For keeping the things simple we will flatten the last two dimensions, from (19, 19, 5, 85) the output of our CNN is flatten to (19, 19, 425).
+
+Now, for each box (of each cell) we will compute the following elementwise product and extract a probability that the box contains a certain class.
+
+<img src="YoloV2/notebook_images/probability_extraction.png" style="width:700px;height:400;">
+
+#### Find the class detected by each box
+
+Here's one example visualizing what YOLO can predict on an image:
+- For each of the `SxS` (19x19) grid cells, find the maximum of the confidence scores (taking a max across both the 5 anchor boxes and across different classes).  
+A confidence score is: probability(containing an object) x IoU(pred, truth).
+If the cell contains an object, it predicts a probability of this object belonging to one class Ci, i=1,2,…, K: probability(the object belongs to the class Ci | containing an object). At this stage, the model only predicts one set of class probabilities per cell, regardless of the number of boxes B. 
+- Color that grid cell according to what object that grid cell considers the most likely.
+- Draw rectangle 
+
+<img src="YoloV2/notebook_images/yolo.png" style="width:100%;height:100%;">
+<caption> Each of the `SxS` (19x19) grid cells colored according the class that has the largest predicted probability in specified cell.</caption>
+
+
+#### Filtering with a threshold on class scores
+
+The output result may contain several rectangles that are false positives or overlap, so we need to find a way to reduce them.
+The first attempt to reduce these rectangles is to filter them by threshold.
+
+##### Non-max suppression 
+
+Even after yolo filtering by thresholding over, we still have a lot of overlapping boxes. Second approach and filtering is Non-Max suppression algorithm.
+
+Let's write the general algorithm : 
+* Get Yolo CNN output
+* Discard all boxes with `Pc <= 0.6`  
+* While tehre are any remaining boxes : 
+    * Pick the box with the largest `Pc`
+    * Output that as a prediction
+    * Discard any remaining boxes with `IOU>=0.5` with the box output in the previous step
+
+<center><img src="YoloV2/notebook_images/nms_algo.jpg" style="width:25%;height:25%;"></center>
+<caption>Example of non max suppression algorithm, on input the aglorithm receive 4 overlapping bounding boxes, and the output returns only one</caption>
+
+Non-max suppression uses the very important function called **"Intersection over Union"**, or IoU.
+<center><img src="YoloV2/notebook_images/iou.png" style="width:500px;height:400;"></center>
+
+
+#### Anchor Boxes
+
+Generating anchor boxes using K-means clustering
+
+There are many ways to compute bounding boxes for detection tasks. One approach is to directly predict the bounding box values, however this approach is susceptible to errors as it tends to favor bounding boxes with large dimensions. Further, the training process is unstable because the range of values to predict can vary significantly.In YOLOv2, the first step is to compute good candidate anchor boxes. This is achieved using K-means clustering. However, using direct Euler distance metric for K-means minizers error for larger bounding boxes, but not for smaller boxes. Therefore, in YOLOv2, intersection over union (IOU) is used as a distance metric. The IOU calculations are made assuming all the bounding boxes are located at one point, i.e. only width and height are used as features. Figure below shows the height and width plotted against each other. Fixed slopes indicate that most bounding boxes have specific predefined aspect ratios, and size. This is not surprising given the fact that a person and vehicle are expected to have certain fixed dimensions.
+
+
+<center><img src="notebook_images/clustering.png" style="width:500px;height:400;"></center>
+
+
+In Yolo V2, this specialization is ‘assisted’ with predefined anchors as in Faster-RCNN. The predefined anchors are chosen to be as representative as possible of the ground truth boxes, with the following K-means clustering algorithm to define them:
+
+* all ground-truth bounding boxes are centered on (0,0)
+
+* the algorithm initiates 5 centroïds by drawing randomly 5 of the ground-truth bounding boxes
+
+* then, the following two steps are alternated:
+
+    * each ground truth box is assigned to one of the centroïd, using as distance measure the IOU, in order to get 5 clusters or groups of ground-truth bouding boxes
+
+    * new centroïds are computed by taking the box inside each cluster that minimizes the mean IOU with all other boxes inside the cluster
 
