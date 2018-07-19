@@ -354,7 +354,7 @@ A similar procedure is followed again, where the feature map from layer 91 is su
 
 YOLO v3, in total uses 9 anchor boxes. Three for each scale. 
 
-<img src="notebook_images/architecture.png" style="width:95%;height:95%;">
+<img src="YoloV3/notebook_images/architecture.png" style="width:95%;height:95%;">
 
 <caption> Note : The last three terms of the loss function in YOLO v2 are the squared errors, whereas in YOLO v3, they’ve been replaced by cross-entropy error terms. In other words, object confidence and class predictions in YOLO v3 are now predicted through logistic regression.  
 YOLO v3, in total uses 9 anchor boxes. Three for each scale</caption>  
@@ -373,6 +373,6 @@ Then, arrange the anchors is descending order of a dimension. Assign the three b
 
 We make predictions on the offsets to the anchors. Nevertheless, if it is unconstrained, our guesses will be randomized again. YOLO predicts 5 parameters (tx, ty, tw, th, and to) and applies the sigma function to constraint its possible offset range.
 
-<img src="notebook_images/formula.png" style="width:50%;height:50%;">
+<img src="YoloV3/notebook_images/formula.png" style="width:50%;height:50%;">
 
 To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 clusters. For COCO, the width and height of the anchors are (10×13),(16×30),(33×23),(30×61),(62×45),(59× 119),(116 × 90),(156 × 198),(373 × 326). These 9 priors are grouped into 3 different groups according to their scale. Each group is assigned to a specific feature map above in detecting objects.
