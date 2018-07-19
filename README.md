@@ -13,6 +13,9 @@
 
 
 
+| Project Video	|  Challenge Video |  Custom Video   |  Custom Video   |
+|:-----------:|:----------:|:---------:|:---------:|
+| [![Introduction video](https://img.youtube.com/vi/OaEXivXLDf0/0.jpg)](https://www.youtube.com/watch?v=OaEXivXLDf0)   	| [![Introduction video](https://img.youtube.com/vi/PnQ2Jzpkhqw/0.jpg)](https://www.youtube.com/watch?v=PnQ2Jzpkhqw)| [![Introduction video](https://img.youtube.com/vi/32Nd1bot3Uc/0.jpg)](https://www.youtube.com/watch?v=32Nd1bot3Uc) | [![Introduction video](https://img.youtube.com/vi/32Nd1bot3Uc/0.jpg)](https://www.youtube.com/watch?v=32Nd1bot3Uc) | 
 
 
 
