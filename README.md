@@ -1,5 +1,5 @@
 ## Writeup Template
-### Writup for this project
+### Author : Kiril Cvetkov
 
 ---
 
@@ -25,7 +25,8 @@ The goals / steps of this project are the following:
 [image8]: ./YoloV3/notebook_images/architecture.png
 [image9]: ./YoloV3/notebook_images/formula.png
 [image10]: ./documentation/hog.png
-
+[image11]: ./documentation/sliding_window.png
+[image12]: ./documentation/examples.png
 
 ### Histogram of Oriented Gradients (HOG)
 
@@ -47,7 +48,7 @@ Here is an example using the `YUV` color space and HOG parameters :
 #### 2. How you I settled my final choice of HOG parameters.
 
 I tried various combinations of parameters, some parameters were bringing good results in classification, but decreasing the train/prediction time and vice versa, so the parameters below brought me :
-* validation accuracy : 98.6 
+* validation accuracy : 98.4
 * fast train/test time
 
 Bellow are the parameter combination I used for extracting the hog features for my project.                   
@@ -57,7 +58,7 @@ Bellow are the parameter combination I used for extracting the hog features for 
 * Cells per block = (2,2)
 
 #### 3. Describtion how  I trained a classifier using my selected HOG features
-I trained a linear SVM using only the `hog features`. First and foremost my goal was to achieve 10+ fps, with fair performance on my Intel i5 8600K.
+I trained a linear SVM using only the `hog features`. First and foremost my goal was to achieve 7+ FPS(frames per sedconds), with fair performance on my Intel i5 8600K.
 
 The full code is inside the main Notebook.py file, under `Generate dataset and train the model heading`.
 I scalled the features values since the range of all features should be normalized so that each feature contributes approximately proportionately to the final distance.
@@ -92,6 +93,7 @@ Code:
 
 The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
 
+* Input [YMin, YMax, Scale]
 * Initialize rectangles to empty list
 * Precompute the Hog Features for the entire image
 * Foreach portion window in `YMin` `YMax` region: 
@@ -102,35 +104,45 @@ The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
           * Append the window region to rectangles list with factor `scale`
     
 
-I use composition of the following Rectangle scales, which were choosen carefully according to:
+I use composition on three search scales, using YUV color channel, and these parameters were choosen carefully according to:
 * Fair accuracy on Test images 
 * Fair processing/search speed
 
 
-YMin = 400  
-YMax = 500  
-scale = 1.5  
-  
-YMin = 400  
-YMax = 550  
-scale = 2.0  
-
-YMin = 400  
-YMax = 600  
-scale = 3.5
-
-
 Below is the result of the input/output sliding window search : 
-
-
-
-![alt text][image3]
+![alt text][image11]
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+I use composition on three search scales, using YUV which were choosen carefully according to:
+* Fair accuracy on Test images 
+* Fair processing/search speed
 
-![alt text][image4]
+* Box Search 1
+     * YMin = 400  
+     * YMax = 500  
+     * scale = 1.5  
+
+* Box Search 2
+     * YMin = 400  
+     * YMax = 550  
+     * scale = 2.0  
+
+* Box Search 3
+     * YMin = 400  
+     * YMax = 600  
+     * scale = 3.5
+     
+Here are some example images:
+
+![alt text][image12]
+
+#### Classifier optimization
+For optimizing the classifier I tried various combinations of parameters, some parameters were bringing good results in classification, but decreasing the train/prediction time and vice versa, so I played with Orient and Pixel per cell arguments and color channel,
+Changing the pixels_per_cell parameter from 8 to 16 produced a roughly ten-fold increase in execution train/test speed with minimal cost to accuracy.
+Using YUV as color channel I got validation accuracy : 98.4
+
+
 ---
 
 ### Video Implementation
@@ -143,8 +155,49 @@ Here's a [link to my video result](./project_video.mp4)
 
 I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+Since I used lot of techniques to speed up the processing time to 7 FPS, we lose valuable data. 
+However this costed me to get more false positives, and true negatives.
+In order to improve performance on false positives and to enhance labeling I constructed the following algorithm : 
 
+Source : cv_utils#draw_labeled_bboxes (Line 265 - Line : 356)
+``` Pseudo - Code
+[Input : previous_frame_rectangles, current_frame_rectangles]
+[Initialize : list alive_rectangles]
+
+for all rectangles in current_frame_rectangles:
+     closest_rectangle =  closest rectangle from previous_frame_rectangles
+     if distance(previous_rectangle, closest_rectangle) > THRESHOLD:
+          we have a new rectangle
+          create new rectangle as new_rectangle
+          new_rectangle.remove_count=10
+          append new_rectangle to alive_rectangles list
+     else 
+          append closest_rectangle to alive_rectangles list
+
+#remove all outdated rectangles
+for all rectangles in (previous_frame_rectangle-current_frame_rectangles):
+     if rectangle.remove_count==0
+          remove rectangle
+     else
+          append rectangle to alive_rectangles list
+     rectangle.remove_count--
+     
+#updated all alive rectangles
+for all rectangles in alive_rectangles :
+     if rectangle is updating it's position with smooth effect :
+          update position to the next delta step
+          rectangle.step_count--
+     else 
+          get rectangle current frame position
+          add smooth animation effect from current position to current frame position
+          rectangle.step_count=20 (It will perform in the next 20 frames)
+     
+     rectangle.start_count++
+     if rectangle.start_count>5 
+          draw rectangle
+     
+previous_frame_rectangles = alive_rectangles
+```
 ### Here are six frames and their corresponding heatmaps:
 
 ![alt text][image5]
