@@ -36,7 +36,7 @@ The goals / steps of this project are the following:
 
 ### Histogram of Oriented Gradients (HOG)
 
-#### 1. Explanation how I extracted HOG features from the training images.
+#### 1. Explanation of how I extracted HOG features from the training images.
 
 
 I started by reading in all the `vehicle` and `non-vehicle` images. 
@@ -67,8 +67,8 @@ Bellow are the parameter combination I used for extracting the hog features for 
 I trained a linear SVM using only the `hog features`. First and foremost my goal was to achieve 7+ FPS(frames per sedconds), with fair performance on my Intel i5 8600K.
 
 The full code is inside the main Notebook.py file, under `Generate dataset and train the model heading`.
-I scalled the features values since the range of all features should be normalized so that each feature contributes approximately proportionately to the final distance.
-Then I used the Linear SVC method which is in fact sklearn implementation for Linear Support Vector Classification.
+I scaled the features values since the range of all features should be normalized so that each feature contributes approximately proportionately to the final distance.
+Then I used the Linear SVC method which is, in fact, sklearn implementation for Linear Support Vector Classification.
 The classifier is implemented so it has more flexibility in the choice of penalties and loss functions and should scale better to large numbers of samples.
 
 
@@ -110,7 +110,7 @@ The full code is available in cv_utils.py:find_cars (Line:115 - Line:179)
           * Append the window region to rectangles list with factor `scale`
     
 
-I use composition on three search scales, using YUV color channel, and these parameters were choosen carefully according to:
+I use composition on three search scales, using YUV color channel, and these parameters were chosen carefully according to:
 * Fair accuracy on Test images 
 * Fair processing/search speed
 
@@ -146,7 +146,7 @@ Here are some example images:
 #### Classifier optimization
 For optimizing the classifier I tried various combinations of parameters, some parameters were bringing good results in classification, but decreasing the train/prediction time and vice versa, so I played with Orient and Pixel per cell arguments and color channel,
 Changing the pixels_per_cell parameter from 8 to 16 produced a roughly ten-fold increase in execution train/test speed with minimal cost to accuracy.
-Using YUV as color channel I got validation accuracy : 98.4
+Using YUV as a color channel I got validation accuracy: 98.4
 
 
 ---
@@ -161,8 +161,8 @@ Here's a [link to my video result](https://www.youtube.com/watch?v=26H7qdBbTls)
 
 I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Since I used lot of techniques to speed up the processing time to 7 FPS, we lose valuable data. 
-However this costed me to get more false positives, and true negatives.
+Since I used a lot of techniques to speed up the processing time to 7 FPS, we lose valuable data. 
+However, this costed me to get more false positives and true negatives.
 In order to improve performance on false positives and to enhance labeling I constructed the following algorithm : 
 
 Source : cv_utils#draw_labeled_bboxes (Line 265 - Line : 356)
@@ -211,9 +211,9 @@ previous_frame_rectangles = alive_rectangles
 
 #### 1. Briefly discussion about problems / issues I faced in my initial implementation of this implementation.  Where will my pipeline likely fail?  What could you do to make it more robust?
 
-First and foremost, The biggest problem of this pipeline is that it's hard for us to create composition of features or applying filters that will work fine on all road conditions, lights, shadows, noise. 
-Second, The sliding window algorithm is not optimal, and it cost us lot of processing time.
-So with 7FPS I can say that I have poor performance and poor quality of my algorithm.
+First and foremost, The biggest problem of this pipeline is that it's hard for us to create a composition of features or applying filters that will work fine on all road conditions, lights, shadows, noise. 
+Second, The sliding window algorithm is not optimal, and it cost us a lot of processing time.
+So with 7FPS, I can say that I have poor performance and poor quality of my algorithm.
 
 My journey has just started here,
 I readed lot about RCNN and YOLO algorithm, and bellow is implementation and explanation of YOLO V2 and V3 for this project.
@@ -237,8 +237,8 @@ Bounding box exmple :
 <img src="YoloV2/notebook_images/rectangle.png" style="width:70%;height:70%;">
 
 
-In this prject, I use pretrained weights, where we have 80 trained yolo classes, for recognition.  
-The class label is represented as `c` and it's integer from 1 to 80, each number represent the class label accordingly.  
+In this project, I use pretrained weights, where we have 80 trained yolo classes, for recognition.  
+The class label is represented as `c` and it's an integer from 1 to 80, each number represent the class label accordingly.  
 If `c=3`, then the classified object is a `car`
 
 
@@ -273,7 +273,7 @@ If the cell contains an object, it predicts a probability of this object belongi
 #### Filtering with a threshold on class scores
 
 The output result may contain several rectangles that are false positives or overlap, so we need to find a way to reduce them.
-The first attempt to reduce these rectangles is to filter them by threshold.
+The first attempt to reduce these rectangles is to filter them by a threshold.
 
 ##### Non-max suppression 
 
@@ -282,7 +282,7 @@ Even after yolo filtering by thresholding over, we still have a lot of overlappi
 Let's write the general algorithm : 
 * Get Yolo CNN output
 * Discard all boxes with `Pc <= 0.6`  
-* While tehre are any remaining boxes : 
+* While there are any remaining boxes : 
     * Pick the box with the largest `Pc`
     * Output that as a prediction
     * Discard any remaining boxes with `IOU>=0.5` with the box output in the previous step
@@ -312,14 +312,14 @@ In Yolo V2, this specialization is ‘assisted’ with predefined anchors as in 
 
 * then, the following two steps are alternated:
 
-    * each ground truth box is assigned to one of the centroid, using as distance measure the IOU, in order to get 5 clusters or groups of ground-truth bouding boxes
+    * each ground truth box is assigned to one of the centroid, using as distance measure the IOU, in order to get 5 clusters or groups of ground-truth bounding boxes
 
     * new centroids are computed by taking the box inside each cluster that minimizes the mean IOU with all other boxes inside the cluster
 
 To determine the priors, YOLOv2 applies k-means cluster. Then it pre-select 5 clusters. For COCO, the width and height of the anchors are (0.57273,0.677385),(1.87446,2.06253 ),(3.33843,5.47434),(7.88282,3.52778),(62×45),(9.77052,9.16828 )
 and they are relative to the final feature map 
 
-#### Instalation :
+#### Installation :
 * Install the packets in requirements.txt file
 * Download the weights
 * Convert the weights with the provided script
@@ -330,7 +330,7 @@ and they are relative to the final feature map
 For the purpose of this project, I'm using a pretrained weights for Yolo V2.
 You can download the weights <a href = "http://pjreddie.com/media/files/yolo.weights"> here</a>
 
-These weights are generated with using pure numpy arrays, but luckily the authors of Yolo provided configuration files containing the full model information, which means we can convert the weights in any high level program language.
+These weights are generated using pure numpy arrays, but luckily the authors of Yolo provided configuration files containing the full model information, which means we can convert the weights in any high-level program language.
 Allan Zelener wrote a function for weights conversion, which works well for Yolo V2, and I provided small modifications for Yolo V3 References are at the end of this notebook.
 
 **Once the download finish, please put the weights file to YoloV2 folder**
@@ -360,12 +360,12 @@ Then, the feature map from layer 79 is subjected to a few convolutional layers b
 
 A similar procedure is followed again, where the feature map from layer 91 is subjected to few convolutional layers before being depth concatenated with a feature map from layer 36. Like before, a few 1 x 1 convolutional layers follow to fuse the information from the previous layer (36). We make the final of the 3 at 106th layer, yielding feature map of size 52 x 52 x 3 x 85.
 
-YOLO v3, in total uses 9 anchor boxes. Three for each scale. 
+YOLO v3, in total, uses 9 anchor boxes. Three for each scale. 
 
 <img src="YoloV3/notebook_images/architecture.png" style="width:95%;height:95%;">
 
 <caption> Note : The last three terms of the loss function in YOLO v2 are the squared errors, whereas in YOLO v3, they’ve been replaced by cross-entropy error terms. In other words, object confidence and class predictions in YOLO v3 are now predicted through logistic regression.  
-YOLO v3, in total uses 9 anchor boxes. Three for each scale</caption>  
+YOLO v3, in total, uses 9 anchor boxes. Three for each scale</caption>  
 
 ---------------------------------------
 
@@ -376,7 +376,7 @@ Generating anchor boxes using K-means clustering
 
 YOLO v3, in total uses 9 anchor boxes. Three for each scale. If you’re training YOLO on your own dataset, you should go about using K-Means clustering to generate 9 anchors.
 
-Then, arrange the anchors is descending order of a dimension. Assign the three biggest anchors for the first scale , the next three for the second scale, and the last three for the third.
+Then, arrange the anchors is descending order of a dimension. Assign the three biggest anchors for the first scale, the next three for the second scale, and the last three for the third.
 
 
 We make predictions on the offsets to the anchors. Nevertheless, if it is unconstrained, our guesses will be randomized again. YOLO predicts 5 parameters (tx, ty, tw, th, and to) and applies the sigma function to constraint its possible offset range.
@@ -396,5 +396,3 @@ To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 cl
 </a>]
 - Jonathan Hui : [<a href="https://medium.com/@jonathan_hui/real-time-object-detection-with-yolo-yolov2-28b1b93e2088">Real-time Object Detection with YOLO, YOLOv2 and now YOLOv3
 </a>]
-
-
