@@ -340,7 +340,7 @@ See notebook :
 
 ### Yolo V3. [Notebook YoloV3](./Documents/Vehicle-Detection/YoloV3/Notebook.ipynb)
 
-### Architercutre details modification
+#### Architercutre details modification
 
 Neural network io:
 -  **input** : (m, 416, 416, 3)
@@ -362,7 +362,7 @@ YOLO v3, in total uses 9 anchor boxes. Three for each scale</caption>
 ---------------------------------------
 
 
-# Anchor Boxes modification
+#### Anchor Boxes modification
 
 Generating anchor boxes using K-means clustering
 
@@ -378,12 +378,6 @@ We make predictions on the offsets to the anchors. Nevertheless, if it is uncons
 To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 clusters. For COCO, the width and height of the anchors are (10×13),(16×30),(33×23),(30×61),(62×45),(59× 119),(116 × 90),(156 × 198),(373 × 326). These 9 priors are grouped into 3 different groups according to their scale. Each group is assigned to a specific feature map above in detecting objects.
 
 
-
-
-
-
-
-
 **References**: 
 - Joseph Redmon, Santosh Divvala, Ross Girshick, Ali Farhadi - [You Only Look Once: Unified, Real-Time Object Detection](https://arxiv.org/abs/1506.02640) (2015)
 - Joseph Redmon, Ali Farhadi - [YOLO9000: Better, Faster, Stronger](https://arxiv.org/abs/1612.08242) (2016)
@@ -395,4 +389,5 @@ To determine the priors, YOLOv3 applies k-means cluster. Then it pre-select 9 cl
 </a>]
 - Jonathan Hui : [<a href="https://medium.com/@jonathan_hui/real-time-object-detection-with-yolo-yolov2-28b1b93e2088">Real-time Object Detection with YOLO, YOLOv2 and now YOLOv3
 </a>]
+
 
